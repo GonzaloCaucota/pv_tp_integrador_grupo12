@@ -1,36 +1,43 @@
-// src/redux/slices/userSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
-// Función auxiliar para obtener la sesión del usuario desde localStorage
-// Esto permite rehidratar el estado de Redux al recargar la página 
+// Recupera la sesion guardada, pero descarta sesiones viejas sin id de PostgreSQL.
 const getSessionUser = () => {
   try {
-    const sessionUser = localStorage.getItem('sessionUser'); // 
-    return sessionUser ? JSON.parse(sessionUser) : null;
+    const sessionUser = localStorage.getItem("sessionUser");
+    const user = sessionUser ? JSON.parse(sessionUser) : null;
+
+    if (!user?.id) {
+      localStorage.removeItem("sessionUser");
+      return null;
+    }
+
+    return user;
   } catch (error) {
-    console.error("Error al leer 'sessionUser' de localStorage:", error);
+    console.error("Error al leer sessionUser de localStorage:", error);
     return null;
   }
 };
 
+const sessionUser = getSessionUser();
+
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState: {
-    currentUser: getSessionUser(), // Inicializa con el usuario de la sesión guardada en localStorage 
-    isAuthenticated: !!getSessionUser(), // true si hay un usuario en sesión, false si no
+    currentUser: sessionUser,
+    isAuthenticated: !!sessionUser,
   },
   reducers: {
-    // Acción para iniciar sesión del usuario 
+    // Guarda el usuario devuelto por /api/login, incluyendo su id real de base de datos.
     loginUser: (state, action) => {
       state.currentUser = action.payload;
       state.isAuthenticated = true;
-      localStorage.setItem('sessionUser', JSON.stringify(action.payload)); // Guarda en localStorage 
+      localStorage.setItem("sessionUser", JSON.stringify(action.payload));
     },
-    // Acción para cerrar sesión del usuario 
+    // Cierra sesion localmente; los favoritos se limpian desde NavBar con clearFavorites.
     logoutUser: (state) => {
       state.currentUser = null;
       state.isAuthenticated = false;
-      localStorage.removeItem('sessionUser'); // Elimina de localStorage 
+      localStorage.removeItem("sessionUser");
     },
   },
 });

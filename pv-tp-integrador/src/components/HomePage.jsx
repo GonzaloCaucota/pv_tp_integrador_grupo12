@@ -24,7 +24,10 @@ const HomePage = () => {
   const loading = productsStatus === "loading";
   const error = productsError;
 
+  // Favoritos viene de Redux, pero ahora Redux se sincroniza con PostgreSQL mediante thunks.
   const favoriteProducts = useSelector((state) => state.favorites.items);
+  // Se necesita el id real del usuario para crear/eliminar favoritos en el backend.
+  const currentUser = useSelector((state) => state.user.currentUser);
 
   //Estado para el criterio de ordenacion
   const [sortCriteria, setSortCriteria] = useState("default");
@@ -117,14 +120,31 @@ const sortedProducts = [...filteredProducts].sort((a, b) => {
             sortedProducts.map((product) => {
               // Verificar si el producto ya está en favoritos para mostrar el estado correcto del botón
               const isFavorite = favoriteProducts.some(
-                (fav) => fav.id === product.id
+                (fav) => String(fav.id) === String(product.id)
               );
 
               const handleToggleFavorite = () => {
+                // Sin usuario logueado no se puede asociar el favorito a una fila de usuarios.
+                if (!currentUser?.id) {
+                  return;
+                }
+
                 if (isFavorite) {
-                  dispatch(removeFavorite(product.id)); // Quitamos de favoritos
+                  // El thunk hace DELETE /api/usuarios/:id/favoritos/:productoId.
+                  dispatch(
+                    removeFavorite({
+                      usuarioId: currentUser.id,
+                      productoId: product.id,
+                    })
+                  ); // Quitamos de favoritos
                 } else {
-                  dispatch(addFavorite(product)); // Añadimos a favoritos
+                  // El thunk hace POST /api/usuarios/:id/favoritos con el producto completo.
+                  dispatch(
+                    addFavorite({
+                      usuarioId: currentUser.id,
+                      producto: product,
+                    })
+                  ); // Añadimos a favoritos
                 }
               };
 

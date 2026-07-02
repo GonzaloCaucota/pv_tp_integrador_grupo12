@@ -1,34 +1,96 @@
-// src/redux/slices/favoritesSlice.js
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import {
+  agregarFavoritoUsuario,
+  eliminarFavoritoUsuario,
+  obtenerFavoritos,
+} from "../../services/api";
+
+// GET /usuarios/:id/favoritos: se usa al iniciar la app o recuperar la sesion.
+export const fetchFavorites = createAsyncThunk(
+  "favorites/fetchFavorites",
+  async (usuarioId, { rejectWithValue }) => {
+    try {
+      return await obtenerFavoritos(usuarioId);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// POST /usuarios/:id/favoritos: guarda un producto favorito en PostgreSQL.
+export const addFavorite = createAsyncThunk(
+  "favorites/addFavorite",
+  async ({ usuarioId, producto }, { rejectWithValue }) => {
+    try {
+      return await agregarFavoritoUsuario(usuarioId, producto);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// DELETE /usuarios/:id/favoritos/:productoId: borra el favorito del usuario.
+export const removeFavorite = createAsyncThunk(
+  "favorites/removeFavorite",
+  async ({ usuarioId, productoId }, { rejectWithValue }) => {
+    try {
+      return await eliminarFavoritoUsuario(usuarioId, productoId);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 const favoritesSlice = createSlice({
   name: "favorites",
   initialState: {
-    items: [], // Un array para almacenar los productos marcados como favoritos
+    items: [],
+    status: "idle",
+    error: null,
   },
   reducers: {
-    // Acción para añadir un producto a favoritos
-    addFavorite: (state, action) => {
-      const productToAdd = action.payload;
-      // Evitar duplicados: Si el producto no está ya en la lista, lo añade
-      if (!state.items.some((item) => item.id === productToAdd.id)) {
-        state.items.push(productToAdd);
-      }
-    },
-    // Acción para quitar un producto de favoritos
-    removeFavorite: (state, action) => {
-      const productIdToRemove = action.payload; // Aquí esperamos solo el ID del producto
-      state.items = state.items.filter((item) => item.id !== productIdToRemove);
-    },
-    // Opcional: para establecer la lista completa de favoritos (útil si los cargas de algún almacenamiento local)
+    // Carga inmediata de favoritos recibidos en el login.
     setFavorites: (state, action) => {
       state.items = action.payload;
     },
+    // Limpia favoritos al cerrar sesion para no mostrar datos de otro usuario.
+    clearFavorites: (state) => {
+      state.items = [];
+      state.status = "idle";
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    // Cada thunk reemplaza items con la lista actualizada que devuelve el backend.
+    builder
+      .addCase(fetchFavorites.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(fetchFavorites.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.items = action.payload;
+      })
+      .addCase(fetchFavorites.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+      .addCase(addFavorite.fulfilled, (state, action) => {
+        state.items = action.payload;
+        state.error = null;
+      })
+      .addCase(addFavorite.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      .addCase(removeFavorite.fulfilled, (state, action) => {
+        state.items = action.payload;
+        state.error = null;
+      })
+      .addCase(removeFavorite.rejected, (state, action) => {
+        state.error = action.payload;
+      });
   },
 });
 
-// Exportamos las acciones
-export const { addFavorite, removeFavorite, setFavorites } =
-  favoritesSlice.actions;
-// Exportamos el reducer
+export const { clearFavorites, setFavorites } = favoritesSlice.actions;
 export default favoritesSlice.reducer;

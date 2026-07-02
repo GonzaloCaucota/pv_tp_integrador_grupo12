@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { registrarUsuario } from "../services/api";
 
 import "./RegisterPage.css";
 
@@ -10,78 +11,58 @@ const RegisterPage = () => {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
+
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    // Validaciones en el front-end
     if (!email || !password || !confirmPassword) {
       setError("Todos los campos obligatorios deben ser completados.");
       return;
     }
 
-    // Correo con formato válido (validación básica)
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setError("El formato del correo electrónico no es válido.");
+      setError("El formato del correo electronico no es valido.");
       return;
     }
 
-    // Contraseña >= 6 caracteres
     if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
+      setError("La contrasena debe tener al menos 6 caracteres.");
       return;
     }
 
-    // Contraseña y confirmación deben coincidir
     if (password !== confirmPassword) {
-      setError("La contraseña y la confirmación no coinciden.");
+      setError("La contrasena y la confirmacion no coinciden.");
       return;
     }
 
     try {
-      // Obtener usuarios existentes de localStorage o inicializar un array vacío
-      const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
-
-      // Verificar si el correo ya está registrado
-      if (existingUsers.some((user) => user.email === email)) {
-        setError("Este correo electrónico ya está registrado.");
-        return;
-      }
-
-      // Crear el nuevo usuario
-      const newUser = {
+      // Registro contra el backend: crea una fila en la tabla usuarios.
+      await registrarUsuario({
+        nombre: name,
         email,
-        password, // En una aplicación real, la contraseña NUNCA se guardaría en texto plano. Se usaría hashing (ej. bcrypt) en el backend.
-        name, // Guardamos el campo extra
-      };
+        password,
+      });
 
-      // Guardar el nuevo usuario en localStorage
-      const updatedUsers = [...existingUsers, newUser];
-      localStorage.setItem("users", JSON.stringify(updatedUsers)); //
-
-      setSuccess("Registro exitoso. Serás redirigido al login."); //
+      setSuccess("Registro exitoso. Seras redirigido al login.");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setName("");
 
-      // Redirigir automáticamente a la ruta "Login" después de un breve retardo
       setTimeout(() => {
-        navigate("/login"); //
-      }, 1500); // Redirige después de 1.5 segundos
+        navigate("/login");
+      }, 1500);
     } catch (err) {
-      console.error("Error al registrar usuario:", err);
-      setError("Error al registrar usuario. Intente de nuevo.");
+      setError(err.message || "Error al registrar usuario. Intente de nuevo.");
     }
   };
 
@@ -102,7 +83,7 @@ const RegisterPage = () => {
             />
           </div>
           <div>
-            <label htmlFor="email">Correo Electrónico:</label>
+            <label htmlFor="email">Correo Electronico:</label>
             <input
               type="email"
               id="email"
@@ -112,7 +93,7 @@ const RegisterPage = () => {
             />
           </div>
           <div>
-            <label htmlFor="password">Contraseña:</label>
+            <label htmlFor="password">Contrasena:</label>
             <div className="password-input">
               <input
                 type={showPassword ? "text" : "password"}
@@ -123,15 +104,15 @@ const RegisterPage = () => {
               />
               <button type="button" onClick={togglePasswordVisibility}>
                 {showPassword ? (
-                  <i class="fa-solid fa-eye"></i>
+                  <i className="fa-solid fa-eye"></i>
                 ) : (
-                  <i class="fa-solid fa-eye-slash"></i>
+                  <i className="fa-solid fa-eye-slash"></i>
                 )}
               </button>
             </div>
           </div>
           <div>
-            <label htmlFor="confirmPassword">Confirmar Contraseña:</label>
+            <label htmlFor="confirmPassword">Confirmar Contrasena:</label>
             <div className="password-input">
               <input
                 type={showPassword ? "text" : "password"}
@@ -142,9 +123,9 @@ const RegisterPage = () => {
               />
               <button type="button" onClick={togglePasswordVisibility}>
                 {showPassword ? (
-                  <i class="fa-solid fa-eye"></i>
+                  <i className="fa-solid fa-eye"></i>
                 ) : (
-                  <i class="fa-solid fa-eye-slash"></i>
+                  <i className="fa-solid fa-eye-slash"></i>
                 )}
               </button>
             </div>
@@ -154,8 +135,8 @@ const RegisterPage = () => {
           </button>
         </form>
         <p>
-          ¿Ya tienes una cuenta?{" "}
-          <span onClick={() => navigate("/login")}>Inicia sesión aquí</span>
+          Ya tienes una cuenta?{" "}
+          <span onClick={() => navigate("/login")}>Inicia sesion aqui</span>
         </p>
       </div>
     </div>

@@ -1,9 +1,9 @@
 .favorites-container {
-  padding: 20px;
+  padding: 50px 20px;
   max-width: 1200px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
-  height: 45vh;
+  min-height: 45vh;
 }
 
 .favorites-container h1 {
@@ -13,7 +13,7 @@
   font-size: 2.5em;
 }
 
-.favorites-container p {
+.favorites-container > p {
   text-align: center;
   color: #666;
   font-size: 1.2em;
@@ -22,7 +22,7 @@
 
 .card-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 25px;
   justify-content: center;
   padding: 20px 0;
@@ -47,7 +47,9 @@
 
 .img-card {
   width: 100%;
-  height: 200px;
+  aspect-ratio: 4 / 3;
+  min-height: 150px;
+  max-height: 200px;
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -71,7 +73,7 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  justify-content: space-between;
+  gap: 14px;
 }
 
 .info-card .product-link {
@@ -80,10 +82,10 @@
 }
 
 .info-card h3 {
-  font-size: 1.3em;
+  font-size: clamp(1rem, 2vw, 1.3rem);
   color: #333;
-  margin-bottom: 10px;
-  min-height: 40px;
+  margin: 0;
+  min-height: 3.2em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -94,8 +96,9 @@
 .info-card p {
   font-size: 1.1em;
   color: #555;
-  margin-bottom: 15px;
+  margin: auto 0 0;
   font-weight: bold;
+  text-align: center;
 }
 
 .info-card button {
@@ -126,7 +129,7 @@
   }
 
   .card-container {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 20px;
   }
 
@@ -134,13 +137,8 @@
     border-radius: 8px;
   }
 
-  .img-card {
-    height: 180px;
-  }
-
   .info-card h3 {
     font-size: 1.2em;
-    min-height: 38px;
   }
 
   .info-card p {
@@ -171,17 +169,12 @@
     border-radius: 6px;
   }
 
-  .img-card {
-    height: 160px;
-  }
-
   .info-card {
     padding: 10px;
   }
 
   .info-card h3 {
     font-size: 1.1em;
-    min-height: 36px;
   }
 
   .info-card p {

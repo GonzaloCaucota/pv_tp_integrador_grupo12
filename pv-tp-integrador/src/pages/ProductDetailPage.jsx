@@ -28,17 +28,33 @@ function ProductDetailsPage() {
   );
   const [error, setError] = useState(null);
 
+  // Lista actual de favoritos sincronizada con PostgreSQL.
   const favoriteItems = useSelector((state) => state.favorites.items);
+  // Usuario logueado; su id se usa para operar contra /usuarios/:id/favoritos.
+  const currentUser = useSelector((state) => state.user.currentUser);
   const isCurrentProductFavorite = favoriteItems.some(
     (fav) => String(fav.id) === String(id) // Mantener la comparación como string para seguridad
   );
 
   const handleToggleFavorite = () => {
-    if (product) {
+    // Desde el detalle tambien se persiste el favorito en backend, no solo en Redux.
+    if (product && currentUser?.id) {
       if (isCurrentProductFavorite) {
-        dispatch(removeFavorite(product.id));
+        // Borra el favorito de la tabla favoritos para este usuario.
+        dispatch(
+          removeFavorite({
+            usuarioId: currentUser.id,
+            productoId: product.id,
+          })
+        );
       } else {
-        dispatch(addFavorite(product));
+        // Guarda el producto actual como fila nueva en favoritos.
+        dispatch(
+          addFavorite({
+            usuarioId: currentUser.id,
+            producto: product,
+          })
+        );
       }
     }
   };

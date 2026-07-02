@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from 'react-redux';
-import { logoutUser } from '../../redux/slices/userSlice';
+import { useSelector, useDispatch } from "react-redux";
+import { clearFavorites } from "../../redux/slices/favoritesSlice";
+import { logoutUser } from "../../redux/slices/userSlice";
 
 import "./NavBar.css";
 
@@ -9,34 +10,49 @@ const NavBar = () => {
   const { currentUser, isAuthenticated } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false); // Estado para menú
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
+    // Cierra la sesion local.
     dispatch(logoutUser());
-    navigate('/login');
-    setMenuOpen(false); // Cerrar menú al desloguear
+    // Limpia favoritos de Redux para que no queden datos del usuario anterior.
+    dispatch(clearFavorites());
+    navigate("/login");
+    setMenuOpen(false);
   };
 
-  const toggleMenu = () => setMenuOpen(!menuOpen); // Toggle abrir/cerrar
+  const toggleMenu = () => setMenuOpen(!menuOpen);
 
   return (
     <nav className="nav-bar">
-     
-
-      {/* Botón hamburguesa solo visible en mobile */}
       <div className="menu-icon" onClick={toggleMenu}>
-        {menuOpen ? "✖" : "☰"}
+        {menuOpen ? "X" : "Menu"}
       </div>
 
-      {/* Contenedor de links visible solo si está abierto en mobile o siempre en desktop */}
       <div className={`links ${menuOpen ? "active" : ""}`}>
         <ul>
-          <li><Link to="/" onClick={() => setMenuOpen(false)}>Inicio</Link></li>
-          <li><Link to="/favorites" onClick={() => setMenuOpen(false)}>Favoritos</Link></li>
+          <li>
+            <Link to="/" onClick={() => setMenuOpen(false)}>
+              Inicio
+            </Link>
+          </li>
+          <li>
+            <Link to="/favorites" onClick={() => setMenuOpen(false)}>
+              Favoritos
+            </Link>
+          </li>
           {!isAuthenticated && (
             <>
-              <li><Link to="/register" onClick={() => setMenuOpen(false)}>Registrarse</Link></li>
-              <li><Link to="/login" onClick={() => setMenuOpen(false)}>Iniciar Sesión</Link></li>
+              <li>
+                <Link to="/register" onClick={() => setMenuOpen(false)}>
+                  Registrarse
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" onClick={() => setMenuOpen(false)}>
+                  Iniciar Sesion
+                </Link>
+              </li>
             </>
           )}
         </ul>
@@ -44,8 +60,11 @@ const NavBar = () => {
 
       {isAuthenticated && currentUser && (
         <div className="user-info">
-          <span>Bienvenido, {currentUser.name || currentUser.email}</span>
-          <button onClick={handleLogout}>Cerrar Sesión</button>
+          <span>
+            {/* El backend devuelve nombre; name queda como fallback por compatibilidad. */}
+            Bienvenido, {currentUser.nombre || currentUser.name || currentUser.email}
+          </span>
+          <button onClick={handleLogout}>Cerrar Sesion</button>
         </div>
       )}
     </nav>
