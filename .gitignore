@@ -1,2 +1,10 @@
 # Local Netlify folder
 .netlify
+node_modules/
+.env
+*.log
+dist/
+backend/node_modules/
+pv-tp-integrador/node_modules/
+
+backend/.env

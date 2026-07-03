@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const app = require("./app");
 const sequelize = require("./config/database");
 // Carga los modelos para que Sequelize conozca tablas y relaciones antes del sync.
