@@ -1,5 +1,5 @@
 // URL base del backend. Se puede cambiar con VITE_API_URL sin tocar el codigo.
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000/api`;
 
 // Wrapper comun para todos los fetch: agrega JSON, parsea respuesta y muestra errores del backend.
 const request = async (path, options = {}) => {
